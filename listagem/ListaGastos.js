@@ -225,12 +225,14 @@ const ListaGastos = ({ transacoes, categoriasDespesa, categoriasReceita, aoAdici
           </Text>
 
           {/* Barra de busca: só guarda o texto digitado, o filtro real
-              só acontece quando o botão "Filtrar" é apertado */}
+              só acontece quando o botão "Filtrar" é apertado.
+              Placeholder mais curto + fonte menor para não cortar em telas estreitas */}
           <Searchbar
-            placeholder="Buscar por descrição, tipo ou categoria"
+            placeholder="Descrição, tipo ou categoria"
             value={busca}
             onChangeText={setBusca}
             style={styles.busca}
+            inputStyle={styles.textoBusca}
           />
 
           <View style={styles.botoes}>
@@ -280,6 +282,7 @@ const styles = StyleSheet.create({
   chip: { marginRight: 6 },
   botaoAdicionar: { marginTop: 4 },
   busca: { marginBottom: 10 },
+  textoBusca: { fontSize: 12 },
   botoes: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   botao: { flex: 1, marginHorizontal: 4 },
   divisor: { marginVertical: 8 },
