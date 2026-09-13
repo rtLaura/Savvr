@@ -18,11 +18,7 @@ const FormularioGastos = () => {
 
     // [Critério 3]: Uso OBRIGATÓRIO do bloco try...catch para tratar erros de entrada
     try {
-      if (
-        renda.trim() === '' ||
-        despesasPrevistas.trim() === '' ||
-        taxaReserva.trim() === ''
-      ) {
+      if (renda.trim() === '' || despesasPrevistas.trim() === '' || taxaReserva.trim() === '') {
         throw new Error('Preencha todos os campos antes de calcular.');
       }
 
@@ -31,11 +27,7 @@ const FormularioGastos = () => {
       const taxaNum = Number(taxaReserva.replace(',', '.'));
 
       // Trata entradas não numéricas
-      if (
-        Number.isNaN(rendaNum) ||
-        Number.isNaN(despesasNum) ||
-        Number.isNaN(taxaNum)
-      ) {
+      if (Number.isNaN(rendaNum) || Number.isNaN(despesasNum) || Number.isNaN(taxaNum)) {
         throw new Error('Os valores informados devem ser numéricos.');
       }
 
@@ -111,15 +103,10 @@ const FormularioGastos = () => {
         {resultado && (
           <Card style={styles.resultadoCard}>
             <Card.Content>
-              <Text>
-                Reserva separada: R$ {resultado.valorReserva.toFixed(2)}
-              </Text>
-              <Text>
-                Saldo Final Livre: R$ {resultado.saldoFinalLivre.toFixed(2)}
-              </Text>
+              <Text>Reserva separada: R$ {resultado.valorReserva.toFixed(2)}</Text>
+              <Text>Saldo Final Livre: R$ {resultado.saldoFinalLivre.toFixed(2)}</Text>
               <Text style={styles.destaque}>
-                Teto Seguro de Gasto Diário: R${' '}
-                {resultado.tetoSeguroDiario.toFixed(2)}
+                Teto Seguro de Gasto Diário: R$ {resultado.tetoSeguroDiario.toFixed(2)}
               </Text>
             </Card.Content>
           </Card>

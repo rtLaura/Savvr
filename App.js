@@ -12,12 +12,17 @@ import LimiteDiario from './diversos/LimiteDiario';
 import ListaGastos from './listagem/ListaGastos';
 import FormularioGastos from './formulario/FormularioGastos';
 
+// Gera a data de hoje no formato dd/mm, usada ao adicionar um novo lançamento
+const formatarDataAtual = () => {
+  const hoje = new Date();
+  const dia = String(hoje.getDate()).padStart(2, '0');
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  return `${dia}/${mes}`;
+};
+
 export default function App() {
   // Dados centrais da aplicação, compartilhados entre os componentes do dashboard
   const [usuario] = useState('Mariana');
-  const [saldoAtual] = useState(4820.5);
-  const [receitas] = useState(6700.0);
-  const [despesas] = useState(1379.5);
 
   const [contas] = useState([
     { id: '1', nome: 'Conta Corrente', saldo: 3200.0 },
@@ -25,21 +30,64 @@ export default function App() {
     { id: '3', nome: 'Carteira', saldo: 420.0 },
   ]);
 
-  const [categorias] = useState([
-    { id: '1', nome: 'Alimentação', orcamento: 800, gasto: 620 },
-    { id: '2', nome: 'Transporte', orcamento: 300, gasto: 180 },
-    { id: '3', nome: 'Lazer', orcamento: 400, gasto: 250 },
-    { id: '4', nome: 'Saúde', orcamento: 250, gasto: 90 },
+  // Categorias pré-definidas de despesa, cada uma com um orçamento mensal.
+  // São as mesmas categorias reutilizadas no formulário de "Novo Lançamento"
+  // em listagem/ListaGastos.js.
+  const [categoriasDespesa] = useState([
+    { id: '1', nome: 'Alimentação', orcamento: 800 },
+    { id: '2', nome: 'Transporte', orcamento: 300 },
+    { id: '3', nome: 'Lazer', orcamento: 400 },
+    { id: '4', nome: 'Saúde', orcamento: 250 },
   ]);
 
-  const [transacoes] = useState([
-    { id: '1', descricao: 'Salário', valor: 6200.0, tipo: 'receita', data: '01/09' },
-    { id: '2', descricao: 'Freelance', valor: 500.0, tipo: 'receita', data: '10/09' },
-    { id: '3', descricao: 'Supermercado', valor: 320.0, tipo: 'despesa', data: '03/09' },
-    { id: '4', descricao: 'Uber', valor: 45.5, tipo: 'despesa', data: '05/09' },
-    { id: '5', descricao: 'Cinema', valor: 60.0, tipo: 'despesa', data: '07/09' },
-    { id: '6', descricao: 'Farmácia', valor: 90.0, tipo: 'despesa', data: '09/09' },
+  // Categorias pré-definidas de receita, também reutilizadas no formulário
+  const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
+
+  // Fonte única de verdade: todos os lançamentos (receitas e despesas).
+  // Saldo, Receitas, Despesas e o gasto de cada categoria são derivados
+  // deste vetor sempre que ele muda (ex: quando o usuário adiciona um novo
+  // lançamento em ListaGastos.js).
+  const [transacoes, setTransacoes] = useState([
+    { id: '1', descricao: 'Salário', valor: 6200.0, tipo: 'receita', categoria: 'Salário', formaPagamento: 'Transferência', data: '01/09' },
+    { id: '2', descricao: 'Freelance', valor: 500.0, tipo: 'receita', categoria: 'Freelance', formaPagamento: 'Pix', data: '10/09' },
+    { id: '3', descricao: 'Supermercado', valor: 320.0, tipo: 'despesa', categoria: 'Alimentação', formaPagamento: 'Cartão de Débito', data: '03/09' },
+    { id: '4', descricao: 'Uber', valor: 45.5, tipo: 'despesa', categoria: 'Transporte', formaPagamento: 'Cartão de Crédito', data: '05/09' },
+    { id: '5', descricao: 'Cinema', valor: 60.0, tipo: 'despesa', categoria: 'Lazer', formaPagamento: 'Dinheiro', data: '07/09' },
+    { id: '6', descricao: 'Farmácia', valor: 90.0, tipo: 'despesa', categoria: 'Saúde', formaPagamento: 'Cartão de Débito', data: '09/09' },
   ]);
+
+  // Adiciona um novo lançamento (receita ou despesa) à lista central.
+  // É passada como prop para ListaGastos.js, que chama esta função após
+  // validar o formulário de "Novo Lançamento".
+  const adicionarTransacao = (dadosNovaTransacao) => {
+    const novaTransacao = {
+      id: String(Date.now()),
+      data: formatarDataAtual(),
+      ...dadosNovaTransacao,
+    };
+    setTransacoes((atual) => [novaTransacao, ...atual]);
+  };
+
+  // Receitas: soma de todas as transações do tipo 'receita'
+  const receitas = transacoes
+    .filter((transacao) => transacao.tipo === 'receita')
+    .reduce((acumulador, transacao) => acumulador + transacao.valor, 0);
+
+  // Despesas: soma de todas as transações do tipo 'despesa'
+  const despesas = transacoes
+    .filter((transacao) => transacao.tipo === 'despesa')
+    .reduce((acumulador, transacao) => acumulador + transacao.valor, 0);
+
+  const saldoAtual = receitas - despesas;
+
+  // Para cada categoria de despesa pré-definida, calcula quanto já foi
+  // gasto somando as transações daquela categoria
+  const categoriasComGasto = categoriasDespesa.map((categoria) => {
+    const gastoCategoria = transacoes
+      .filter((transacao) => transacao.tipo === 'despesa' && transacao.categoria === categoria.nome)
+      .reduce((acumulador, transacao) => acumulador + transacao.valor, 0);
+    return { ...categoria, gasto: gastoCategoria };
+  });
 
   return (
     <PaperProvider>
@@ -89,7 +137,7 @@ export default function App() {
         </Card>
 
         {/* [Critério 1]: Montagem do componente Categorias (função anônima) */}
-        <Categorias categorias={categorias} />
+        <Categorias categorias={categoriasComGasto} />
 
         {/* [Critério 1]: Montagem do componente LimiteDiario (arrow function) */}
         <LimiteDiario saldoAtual={saldoAtual} transacoes={transacoes} diasRestantesMes={20} />
@@ -97,8 +145,14 @@ export default function App() {
         {/* [Critério 1]: Montagem do componente Historico (componente de classe) */}
         <Historico transacoes={transacoes} />
 
-        {/* [Critério 2]: Montagem do componente ListaGastos, com busca e filter() */}
-        <ListaGastos />
+        {/* [Critério 2]: Montagem do componente ListaGastos, com busca, filter() e
+            formulário para adicionar receitas/despesas por categoria pré-definida */}
+        <ListaGastos
+          transacoes={transacoes}
+          categoriasDespesa={categoriasDespesa}
+          categoriasReceita={categoriasReceita}
+          aoAdicionarTransacao={adicionarTransacao}
+        />
 
         {/* [Critério 3]: Montagem do componente FormularioGastos, com cálculo e try/catch */}
         <FormularioGastos />

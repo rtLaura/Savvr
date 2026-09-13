@@ -58,10 +58,9 @@ Savvr/
 
 ### Critério 2 — Listagem com filtro usando `filter()` (2,0 pts)
 - Arquivo: `listagem/ListaGastos.js`.
-- Vetor `gastos` com 8 objetos, cada um com 4 atributos: `nome`, `valor`, `tipo`,
-  `formaPagamento`.
-- Campo `Searchbar` + botão **"Filtrar"** que aplica `.filter()` sobre o vetor,
-  buscando por nome, tipo ou forma de pagamento.
+- Vetor central de transações (`transacoes`, mantido em `App.js`) com objetos contendo `descricao`, `valor`, `tipo`, `categoria`, `formaPagamento` e `data`.
+- Campo `Searchbar` + botão **"Filtrar"** que aplica `.filter()` sobre a lista, buscando por descrição, tipo, categoria ou forma de pagamento.
+- **Funcionalidade extra**: o mesmo arquivo também traz um formulário de **"Novo Lançamento"**, onde o usuário escolhe Despesa ou Receita e seleciona a categoria em um dropdown (`Menu`) com as categorias pré-definidas. Ao adicionar, o lançamento é enviado para `App.js` (via prop `aoAdicionarTransacao`), que atualiza automaticamente o Saldo Atual, Receitas, Despesas, o Histórico e os Orçamentos por Categoria no dashboard.
 - Comentários `// [Critério 2]: ...` indicam o uso do `filter()` e o botão acionável.
 
 ### Critério 3 — Formulário com cálculo e tratamento de erros (2,0 pts)
