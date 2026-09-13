@@ -12,41 +12,69 @@ import LimiteDiario from './diversos/LimiteDiario';
 import ListaGastos from './listagem/ListaGastos';
 import FormularioGastos from './formulario/FormularioGastos';
 
-// Gera a data de hoje no formato dd/mm, usada ao adicionar um novo lançamento
+// Função auxiliar: devolve a data de hoje já formatada como "dd/mm".
+// Usada quando um novo lançamento é adicionado (ele recebe a data atual).
 const formatarDataAtual = () => {
   const hoje = new Date();
-  const dia = String(hoje.getDate()).padStart(2, '0');
-  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoje.getDate()).padStart(2, '0'); // padStart garante 2 dígitos, ex: "03"
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // getMonth() começa em 0, por isso o +1
   return `${dia}/${mes}`;
 };
 
+// App.js é a tela principal: monta o dashboard inteiro e guarda os dados
+// que são compartilhados entre os componentes (contas, categorias e transações).
 export default function App() {
-  // Dados centrais da aplicação, compartilhados entre os componentes do dashboard
+  // Nome exibido na saudação do topo ("Olá, Mariana")
   const [usuario] = useState('Mariana');
 
+  // Lista fixa de contas do usuário, só para exibição no card "Saldo das Contas"
   const [contas] = useState([
     { id: '1', nome: 'Conta Corrente', saldo: 3200.0 },
     { id: '2', nome: 'Poupança', saldo: 1200.5 },
     { id: '3', nome: 'Carteira', saldo: 420.0 },
   ]);
 
-  // Categorias pré-definidas de despesa, cada uma com um orçamento mensal.
-  // São as mesmas categorias reutilizadas no formulário de "Novo Lançamento"
-  // em listagem/ListaGastos.js.
-  const [categoriasDespesa] = useState([
+  // Categorias com orçamento mensal definido — usadas apenas no card
+  // "Orçamentos por Categoria" do dashboard (diversos/Categorias.js).
+  // Cada uma tem um limite de gasto (orcamento) para acompanhar.
+  const [categoriasOrcamento] = useState([
     { id: '1', nome: 'Alimentação', orcamento: 800 },
     { id: '2', nome: 'Transporte', orcamento: 300 },
     { id: '3', nome: 'Lazer', orcamento: 400 },
     { id: '4', nome: 'Saúde', orcamento: 250 },
   ]);
 
-  // Categorias pré-definidas de receita, também reutilizadas no formulário
-  const categoriasReceita = ['Salário', 'Freelance', 'Investimentos', 'Outros'];
+  // Lista completa de categorias de despesa pré-definidas, usada para
+  // classificar lançamentos no formulário "Novo Lançamento" em
+  // listagem/ListaGastos.js (nem todas têm orçamento acompanhado no dashboard).
+  const categoriasDespesa = [
+    'Alimentação',
+    'Animais',
+    'Educação',
+    'Estética',
+    'Finanças',
+    'Imóveis',
+    'Impostos',
+    'Investimentos',
+    'Lazer',
+    'Moradia',
+    'Pessoas',
+    'Saúde',
+    'Seguros',
+    'Tecnologia',
+    'Transporte',
+  ];
 
-  // Fonte única de verdade: todos os lançamentos (receitas e despesas).
-  // Saldo, Receitas, Despesas e o gasto de cada categoria são derivados
-  // deste vetor sempre que ele muda (ex: quando o usuário adiciona um novo
-  // lançamento em ListaGastos.js).
+  // Categorias pré-definidas de receita, também reutilizadas no formulário
+  const categoriasReceita = ['Freelance', 'Investimentos', 'Outros', 'Salário'];
+
+  // -----------------------------------------------------------------------
+  // Fonte única de verdade da aplicação: todas as transações (receitas e
+  // despesas) ficam guardadas aqui. Saldo Atual, Receitas, Despesas e o
+  // gasto de cada categoria são todos CALCULADOS a partir deste vetor mais
+  // abaixo — por isso, quando um lançamento é adicionado, o dashboard
+  // inteiro se atualiza sozinho.
+  // -----------------------------------------------------------------------
   const [transacoes, setTransacoes] = useState([
     { id: '1', descricao: 'Salário', valor: 6200.0, tipo: 'receita', categoria: 'Salário', formaPagamento: 'Transferência', data: '01/09' },
     { id: '2', descricao: 'Freelance', valor: 500.0, tipo: 'receita', categoria: 'Freelance', formaPagamento: 'Pix', data: '10/09' },
@@ -56,46 +84,52 @@ export default function App() {
     { id: '6', descricao: 'Farmácia', valor: 90.0, tipo: 'despesa', categoria: 'Saúde', formaPagamento: 'Cartão de Débito', data: '09/09' },
   ]);
 
-  // Adiciona um novo lançamento (receita ou despesa) à lista central.
-  // É passada como prop para ListaGastos.js, que chama esta função após
-  // validar o formulário de "Novo Lançamento".
+  // Adiciona um novo lançamento à lista central de transações.
+  // Esta função é passada como prop para ListaGastos.js (aoAdicionarTransacao),
+  // que a chama depois de validar o formulário de "Novo Lançamento".
   const adicionarTransacao = (dadosNovaTransacao) => {
     const novaTransacao = {
-      id: String(Date.now()),
-      data: formatarDataAtual(),
-      ...dadosNovaTransacao,
+      id: String(Date.now()), // usa o horário atual como um id "único o bastante"
+      data: formatarDataAtual(), // marca a data de hoje no lançamento
+      ...dadosNovaTransacao, // espalha descricao, valor, tipo, categoria e formaPagamento
     };
+    // Coloca a nova transação no início da lista, mantendo as antigas
     setTransacoes((atual) => [novaTransacao, ...atual]);
   };
 
-  // Receitas: soma de todas as transações do tipo 'receita'
+  // Receitas: filtra só as transações do tipo 'receita' e soma os valores com reduce
   const receitas = transacoes
     .filter((transacao) => transacao.tipo === 'receita')
     .reduce((acumulador, transacao) => acumulador + transacao.valor, 0);
 
-  // Despesas: soma de todas as transações do tipo 'despesa'
+  // Despesas: filtra só as transações do tipo 'despesa' e soma os valores com reduce
   const despesas = transacoes
     .filter((transacao) => transacao.tipo === 'despesa')
     .reduce((acumulador, transacao) => acumulador + transacao.valor, 0);
 
+  // Saldo Atual é sempre Receitas menos Despesas
   const saldoAtual = receitas - despesas;
 
-  // Para cada categoria de despesa pré-definida, calcula quanto já foi
-  // gasto somando as transações daquela categoria
-  const categoriasComGasto = categoriasDespesa.map((categoria) => {
+  // Para cada categoria orçada, calcula quanto já foi gasto: filtra as
+  // transações de despesa daquela categoria e soma os valores.
+  // O resultado (categoriasComGasto) é passado para o componente Categorias.
+  const categoriasComGasto = categoriasOrcamento.map((categoria) => {
     const gastoCategoria = transacoes
       .filter((transacao) => transacao.tipo === 'despesa' && transacao.categoria === categoria.nome)
       .reduce((acumulador, transacao) => acumulador + transacao.valor, 0);
-    return { ...categoria, gasto: gastoCategoria };
+    return { ...categoria, gasto: gastoCategoria }; // categoria original + o gasto calculado
   });
 
   return (
+    // PaperProvider precisa envolver todo o app para os componentes do
+    // react-native-paper (Card, Button, Text, etc.) funcionarem corretamente
     <PaperProvider>
       {/* [Critério 1]: Montagem do componente Appbar no topo da aplicação */}
       <Appbar titulo={`Olá, ${usuario}`} subtitulo="Bem-vinda de volta ao Savvr" />
 
+      {/* ScrollView permite rolar a tela quando o conteúdo não cabe inteiro */}
       <ScrollView style={styles.container} contentContainerStyle={styles.conteudo}>
-        {/* Card de destaque do Saldo Atual */}
+        {/* Card de destaque do Saldo Atual (fundo roxo) */}
         <View style={styles.linhaResumo}>
           <Card style={[styles.cardResumo, styles.cardSaldo]}>
             <Card.Content>
@@ -105,7 +139,7 @@ export default function App() {
           </Card>
         </View>
 
-        {/* Cards de Receitas e Despesas */}
+        {/* Dois cards lado a lado: Receitas (verde) e Despesas (vermelho) */}
         <View style={styles.linhaResumo}>
           <Card style={[styles.cardResumo, styles.cardMetade]}>
             <Card.Content>
@@ -121,7 +155,7 @@ export default function App() {
           </Card>
         </View>
 
-        {/* Saldo das Contas */}
+        {/* Card "Saldo das Contas": lista cada conta com map() */}
         <Card style={styles.card}>
           <Card.Content>
             <Text variant="titleMedium" style={styles.titulo}>
@@ -146,7 +180,9 @@ export default function App() {
         <Historico transacoes={transacoes} />
 
         {/* [Critério 2]: Montagem do componente ListaGastos, com busca, filter() e
-            formulário para adicionar receitas/despesas por categoria pré-definida */}
+            formulário para adicionar receitas/despesas por categoria pré-definida.
+            Repare que passamos 'adicionarTransacao' como prop: é assim que
+            ListaGastos.js consegue atualizar os dados aqui em App.js. */}
         <ListaGastos
           transacoes={transacoes}
           categoriasDespesa={categoriasDespesa}
@@ -157,12 +193,14 @@ export default function App() {
         {/* [Critério 3]: Montagem do componente FormularioGastos, com cálculo e try/catch */}
         <FormularioGastos />
 
+        {/* Espaço em branco no final, só para não colar o último card na borda da tela */}
         <View style={{ height: 24 }} />
       </ScrollView>
     </PaperProvider>
   );
 }
 
+// Estilos visuais usados nesta tela
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F3FA' },
   conteudo: { paddingBottom: 24 },
