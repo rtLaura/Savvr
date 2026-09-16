@@ -35,12 +35,9 @@ export default function App() {
   
     setTransacoes((atual) => [novaTransacao, ...atual]);
 
-    // se por algum motivo a forma de pagamento não tiver mapeamento, usamos "Conta Corrente" como padrão
+    // Se por algum motivo a forma de pagamento não tiver mapeamento, usamos "Conta Corrente" como padrão
     const contaAlvo =
-      dadosNovaTransacao.categoria === 'Depósito' ||
-      dadosNovaTransacao.categoria === 'Saque Bancário'
-        ? 'Poupança'
-        : mapaFormaPagamentoConta[dadosNovaTransacao.formaPagamento] || 'Conta Corrente';
+      mapaFormaPagamentoConta[dadosNovaTransacao.formaPagamento] || 'Conta Corrente';
 
     setContas((atual) =>
       atual.map((conta) =>
