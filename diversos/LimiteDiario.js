@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import calcularTetoDiario from './utils/Calculos';
 
-// [Critério 4]: Componente criado utilizando ARROW FUNCTION
+// [Critério 4]: Componente criado utilizando Arrow Function
 // Calcula e mostra quanto o usuário pode gastar por dia, com base no
 // saldo atual e no histórico de despesas, até o fim do mês.
 
