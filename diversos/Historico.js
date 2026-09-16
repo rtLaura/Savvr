@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { Card, Text, List, Button } from 'react-native-paper';
 import styles from '../assets/styles'
 
-//criado usando Classe
+//[Critério 4]: criado usando Classe
 class Historico extends React.Component {
 
   constructor(props) {
@@ -14,7 +14,7 @@ class Historico extends React.Component {
     };
   }
 
-  //arrow function
+  //[Critério 4]: arrow function
   mudarFiltro = (valor) => {
     this.setState({ filtro: valor });
   };
@@ -23,7 +23,7 @@ class Historico extends React.Component {
     const { transacoes } = this.props;
     const { filtro } = this.state;
 
-    //uso do filter
+    //[Critério 4]: uso do filter
     const transacoesFiltradas =
       filtro === 'todos'
         ? transacoes
@@ -61,7 +61,7 @@ class Historico extends React.Component {
 
           {/* [Critério 4]: Uso do map() para renderizar cada item do histórico já filtrado.
               Para cada transação, cria um List.Item mostrando descrição, data,
-              um ícone (seta pra cima/baixo) e o valor colorido */}
+              seta pra cima/baixo e o valor colorido */}
           {transacoesFiltradas.map((transacao) => (
             <List.Item
               key={transacao.id}

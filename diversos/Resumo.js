@@ -1,50 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 
 import styles from '../assets/styles';
-import formatarDataAtual from './utils/FormatarData';
 
-import {
-  contas,
-  categoriasOrcamento,
-  categoriasDespesa,
-  categoriasReceita,
-  transacoes as transacoesIniciais
-} from '../listagem/Constants';
-const Resumo = () => {
+{/*Função Anônima*/}
+const Resumo = function (props) {
+  const { transacoes, contas } = props;
 
-  const [transacoes, setTransacoes] = useState(transacoesIniciais);
-
-  const adicionarTransacao = (dadosNovaTransacao) => {
-
-    const novaTransacao = {
-      id: String(Date.now()),
-      data: formatarDataAtual(),
-      ...dadosNovaTransacao,
-    };
-
-    setTransacoes((atual) => [
-      novaTransacao,
-      ...atual,
-    ]);
-  };
-
+  {/*uso de reduce*/}
   const receitas = transacoes
     .filter((transacao) => transacao.tipo === 'receita')
-    .reduce(
-      (acumulador, transacao) =>
-        acumulador + transacao.valor,
-      0
-    );
+    .reduce((acumulador, transacao) => acumulador + transacao.valor, 0);
 
+  {/*uso de reduce*/}
   const despesas = transacoes
     .filter((transacao) => transacao.tipo === 'despesa')
-    .reduce(
-      (acumulador, transacao) =>
-        acumulador + transacao.valor,
-      0
-    );
+    .reduce((acumulador, transacao) => acumulador + transacao.valor, 0);
 
   const saldoAtual = receitas - despesas;
 
@@ -119,6 +91,7 @@ const Resumo = () => {
             Saldo das Contas
           </Text>
 
+          {/*uso do map*/}
           {contas.map((conta) => (
 
             <View

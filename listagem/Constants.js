@@ -1,22 +1,7 @@
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
-import { Provider as PaperProvider, Card, Text } from 'react-native-paper';
-import formatarDataAtual from '../diversos/utils/FormatarData'
-
-
-export const usuario = 'Mariana';
-
 export const contas = [
   { id: '1', nome: 'Conta Corrente', saldo: 3200.0 },
   { id: '2', nome: 'Poupança', saldo: 1200.5 },
   { id: '3', nome: 'Carteira', saldo: 420.0 },
-];
-
-export const categoriasOrcamento = [
-  { id: '1', nome: 'Alimentação', orcamento: 800 },
-  { id: '2', nome: 'Transporte', orcamento: 300 },
-  { id: '3', nome: 'Lazer', orcamento: 400 },
-  { id: '4', nome: 'Saúde', orcamento: 250 },
 ];
 
 export const categoriasDespesa = [
@@ -31,6 +16,7 @@ export const categoriasDespesa = [
   'Lazer',
   'Moradia',
   'Pessoas',
+  'Saque Bancário',
   'Saúde',
   'Seguros',
   'Tecnologia',
@@ -38,6 +24,7 @@ export const categoriasDespesa = [
 ];
 
 export const categoriasReceita = [
+  'Depósito',
   'Freelance',
   'Investimentos',
   'Outros',
@@ -59,6 +46,25 @@ export const formasPagamento = [
     'Cartão de Débito',
     'Dinheiro',
     'Pix',
+    'Poupança',
     'Transferência',
   ];
+
+// Mapeia cada forma de pagamento/recebimento para a conta que deve
+// ter o saldo alterado quando ela é usada em uma transação.
+
+// Quantidade de dias restantes no mês, usada no cálculo do teto diário
+// (LimiteDiario.js e FormularioGastos.js). Fica centralizada aqui para
+// os dois lugares usarem sempre o mesmo valor.
+export const diasRestantesMes = 20;
+
+export const mapaFormaPagamentoConta = {
+  'Dinheiro': 'Carteira',
+  'Pix': 'Conta Corrente',
+  'Transferência': 'Conta Corrente',
+  'Boleto': 'Conta Corrente',
+  'Cartão de Débito': 'Conta Corrente',
+  'Cartão de Crédito': 'Conta Corrente',
+  'Poupança': 'Poupança',
+};
 

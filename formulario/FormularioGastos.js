@@ -4,13 +4,15 @@ import { Card, Text, TextInput, Button, HelperText} from 'react-native-paper';
 import styles from '../assets/styles'
 import { formasPagamento } from '../listagem/Constants';
 import Bloquinhos from '../diversos/utils/Bloquinhos'
+import calcularTetoDiario from '../diversos/utils/Calculos'
 
 
 const FormularioGastos = ({
-  transacoes,
   categoriasDespesa,
   categoriasReceita,
   aoAdicionarTransacao,
+  saldoAtual,
+  diasRestantesMes,
 }) => {
 
 
@@ -26,39 +28,41 @@ const FormularioGastos = ({
       ? categoriasDespesa
       : categoriasReceita;
 
-
-//cálculo
-  const receitas = transacoes
-    .filter((transacao) => transacao.tipo === 'receita')
-    .reduce(
-      (acumulador, transacao) =>
-        acumulador + transacao.valor,
-      0
-    );
-
-  const despesas = transacoes
-    .filter((transacao) => transacao.tipo === 'despesa')
-    .reduce(
-      (acumulador, transacao) =>
-        acumulador + transacao.valor,
-      0
-    );
-
-  const saldoAtual = receitas - despesas;
-
-  const valorDigitado = Number(
-    novoValor.replace(',', '.')
-  );
-
-  const percentualDoSaldo =
-    saldoAtual !== 0 && !Number.isNaN(valorDigitado)
-      ? (valorDigitado / Math.abs(saldoAtual)) * 100
-      : 0;
-
   const escolherTipo = (tipo) => {
     setNovoTipo(tipo);
     setNovaCategoria('');
   };
+
+  // [Critério 3]: Cálculo com fórmula significativa, feito aqui dentro do
+  // próprio formulário.
+  // A cada valor digitado, é simulado como ficaria o "teto seguro de gastos
+  // por dia" (mesma fórmula do LimiteDiario.js: saldo disponível / dias
+  // restantes no mês) SE esse lançamento fosse confirmado agora.
+  let tetoSimulado = null;
+  let erroTetoSimulado = '';
+
+  // Só calcula se o usuário já digitou algo no campo Valor
+  if (novoValor.trim() !== '') {
+    try {
+      const valorDigitado = Number(novoValor.replace(',', '.'));
+
+      if (Number.isNaN(valorDigitado) || valorDigitado <= 0) {
+        throw new Error('Informe um valor numérico maior que zero.');
+      }
+
+      // Simula o saldo após confirmar este lançamento. Soma se for receita, subtrai se for despesa
+      const saldoSimulado =
+        novoTipo === 'receita'
+          ? saldoAtual + valorDigitado
+          : saldoAtual - valorDigitado;
+
+      //A mesma fórmula usada em LimiteDiario.js
+      tetoSimulado = calcularTetoDiario(saldoSimulado, diasRestantesMes);
+    } catch (erro) {
+      // [Critério 3]: erro do cálculo tratado com try...catch
+      erroTetoSimulado = erro.message;
+    }
+  }
 
   const adicionarLancamento = () => {
     setErroForm('');
@@ -162,6 +166,21 @@ const FormularioGastos = ({
           mode="outlined"
           style={styles.input}
         />
+
+        {/* [Critério 3]: resultado do cálculo do teto diário simulado,
+            atualizado conforme o usuário digita o valor */}
+        {novoValor.trim() !== '' && (
+          tetoSimulado !== null ? (
+            <Text style={styles.calculo}>
+              Você pode gastar até R$ {tetoSimulado.toFixed(2)} hoje
+            </Text>
+          ) : (
+            <HelperText type="error" visible={erroTetoSimulado !== ''}>
+              {erroTetoSimulado}
+            </HelperText>
+          )
+        )}
+
         <Text style={styles.rotuloCategoria}>Categoria</Text>
         <Bloquinhos
           opcoes={categoriasDisponiveis}
