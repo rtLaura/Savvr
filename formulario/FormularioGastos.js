@@ -37,7 +37,7 @@ const FormularioGastos = ({
   // próprio formulário.
   // A cada valor digitado, é simulado como ficaria o "teto seguro de gastos
   // por dia" (mesma fórmula do LimiteDiario.js: saldo disponível / dias
-  // restantes no mês) SE esse lançamento fosse confirmado agora.
+  // restantes no mês) 
   let tetoSimulado = null;
   let erroTetoSimulado = '';
 

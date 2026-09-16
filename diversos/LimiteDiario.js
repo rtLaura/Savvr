@@ -28,7 +28,7 @@ const LimiteDiario = ({ saldoAtual, transacoes, diasRestantesMes }) => {
   const saldoRestante = saldoAtual;
 
   // Teto seguro por dia = saldo restante dividido pelos dias que faltam no mês.
-  // Usa a função compartilhada calcularTetoDiario, protegida com try...catch
+  // Usa a função compartilhada calcularTetoDiario, com try...catch
   // caso diasRestantesMes chegue inválido (0, negativo, etc.).
   let tetoDiario = 0;
   let erroCalculo = '';

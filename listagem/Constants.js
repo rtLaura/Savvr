@@ -53,11 +53,6 @@ export const formasPagamento = [
 // Mapeia cada forma de pagamento/recebimento para a conta que deve
 // ter o saldo alterado quando ela é usada em uma transação.
 
-// Quantidade de dias restantes no mês, usada no cálculo do teto diário
-// (LimiteDiario.js e FormularioGastos.js). Fica centralizada aqui para
-// os dois lugares usarem sempre o mesmo valor.
-export const diasRestantesMes = 20;
-
 export const mapaFormaPagamentoConta = {
   'Dinheiro': 'Carteira',
   'Pix': 'Conta Corrente',

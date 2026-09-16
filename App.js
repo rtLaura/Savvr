@@ -6,7 +6,7 @@ import Historico from './diversos/Historico';
 import LimiteDiario from './diversos/LimiteDiario';
 import ListaGastos from './listagem/ListaGastos';
 import FormularioGastos from './formulario/FormularioGastos';
-import formatarDataAtual from './diversos/utils/FormatarData'
+import formatarDataAtual, { diasRestantesDoMes } from './diversos/utils/FormatarData'
 import styles from './assets/styles'
 import {
   categoriasDespesa,
@@ -14,7 +14,6 @@ import {
   contas as contasIniciais,
   transacoes as transacao,
   mapaFormaPagamentoConta,
-  diasRestantesMes,
 } from './listagem/Constants';
 import Resumo from './diversos/Resumo'
 
@@ -22,6 +21,10 @@ import Resumo from './diversos/Resumo'
 export default function App() {
   const [transacoes, setTransacoes] = useState(transacao);
   const [contas, setContas] = useState(contasIniciais);
+
+  // Dias que ainda faltam para o fim do mês, calculados a partir da data real
+  // de hoje (antes era um número fixo = 20). A função está em FormatarData.js.
+  const diasRestantesMes = diasRestantesDoMes();
 
   const adicionarTransacao = (dadosNovaTransacao) => {
   const novaTransacao = {
@@ -32,15 +35,7 @@ export default function App() {
   
     setTransacoes((atual) => [novaTransacao, ...atual]);
 
-    // Toda transação precisa alterar o saldo de ALGUMA conta, não só da
-    // Poupança. A conta afetada é escolhida assim:
-    // - se a categoria for "Depósito" ou "Saque Bancário", a conta afetada
-    //   é sempre a Poupança (é o próprio sentido dessas categorias);
-    // - caso contrário, a conta é definida pela forma de pagamento
-    //   escolhida no formulário (ex: "Dinheiro" -> Carteira, "Pix" ->
-    //   Conta Corrente, etc.), usando o mapa em Constants.js;
-    // - se por algum motivo a forma de pagamento não tiver mapeamento
-    //   (ex: "Não informado"), usamos "Conta Corrente" como padrão.
+    // se por algum motivo a forma de pagamento não tiver mapeamento, usamos "Conta Corrente" como padrão
     const contaAlvo =
       dadosNovaTransacao.categoria === 'Depósito' ||
       dadosNovaTransacao.categoria === 'Saque Bancário'
