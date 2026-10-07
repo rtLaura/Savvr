@@ -5,7 +5,7 @@
 
 ## 1 - Organização e funcionamento geral da aplicação
 ### Estrutura de pastas em: assets / diversos / formulario / listagem
-### Ponto de entrada: App.js e index.js
+
 
 ## 2 - Listagem com filtro usando filter()
 ### Pode ser encontrado em listagem/ListaGastos.js
